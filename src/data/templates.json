@@ -1,0 +1,102 @@
+[
+  {
+    "id": "icebreaker",
+    "name": "Team Icebreaker",
+    "description": "Quick warm-up poll + word cloud",
+    "slides": [
+      {
+        "id": "tpl_ice_1",
+        "type": "content",
+        "question": "Welcome!",
+        "title": "Team Icebreaker",
+        "subtitle": "Let's get to know each other",
+        "bullets": ["Join with the room code", "Answer on your phone", "Have fun!"]
+      },
+      {
+        "id": "tpl_ice_2",
+        "type": "multiple_choice",
+        "question": "How are you feeling today?",
+        "options": ["Energized", "Neutral", "Tired but here", "Need coffee"]
+      },
+      {
+        "id": "tpl_ice_3",
+        "type": "word_cloud",
+        "question": "One word that describes your week"
+      },
+      {
+        "id": "tpl_ice_4",
+        "type": "qa",
+        "question": "Ask the host anything!"
+      }
+    ]
+  },
+  {
+    "id": "trivia-night",
+    "name": "Trivia Night",
+    "description": "Competitive quiz with leaderboard",
+    "slides": [
+      {
+        "id": "tpl_tri_1",
+        "type": "content",
+        "question": "Trivia Night",
+        "title": "Trivia Night",
+        "subtitle": "Speed wins points!",
+        "bullets": ["Fastest correct answer scores highest", "Top 3 get medals"]
+      },
+      {
+        "id": "tpl_tri_2",
+        "type": "quiz",
+        "question": "What planet is known as the Red Planet?",
+        "options": ["Venus", "Mars", "Jupiter", "Saturn"],
+        "correctOptionIndex": 1,
+        "timeLimit": 20,
+        "explanation": "Mars appears red due to iron oxide on its surface."
+      },
+      {
+        "id": "tpl_tri_3",
+        "type": "quiz",
+        "question": "How many continents are there?",
+        "options": ["5", "6", "7", "8"],
+        "correctOptionIndex": 2,
+        "timeLimit": 15,
+        "explanation": "The 7 continents: Africa, Antarctica, Asia, Australia, Europe, North America, South America."
+      },
+      {
+        "id": "tpl_tri_4",
+        "type": "rating_scale",
+        "question": "Rate tonight's trivia!",
+        "scaleStatements": ["Difficulty", "Fun factor", "Would play again"]
+      }
+    ]
+  },
+  {
+    "id": "feedback-session",
+    "name": "Feedback Session",
+    "description": "Ratings + open Q&A for retros",
+    "slides": [
+      {
+        "id": "tpl_fb_1",
+        "type": "content",
+        "question": "Feedback Time",
+        "title": "Session Feedback",
+        "subtitle": "Your honest input helps us improve"
+      },
+      {
+        "id": "tpl_fb_2",
+        "type": "rating_scale",
+        "question": "Rate this session",
+        "scaleStatements": ["Content quality", "Pacing", "Overall value"]
+      },
+      {
+        "id": "tpl_fb_3",
+        "type": "word_cloud",
+        "question": "What was the highlight?"
+      },
+      {
+        "id": "tpl_fb_4",
+        "type": "qa",
+        "question": "Questions or suggestions for next time?"
+      }
+    ]
+  }
+]

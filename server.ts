@@ -18,6 +18,7 @@ import { filterText, filterWords } from "./src/server/moderation.js";
 import { calculateQuizPoints } from "./src/server/scoring.js";
 import { uniqueNickname } from "./src/server/nicknames.js";
 import { generateDeck, getActiveProvider, getProviderLabel } from "./src/server/ai/generateDeck.js";
+import { suggestTone } from "./src/server/ai/suggestTone.js";
 import { apiLimiter, aiLimiter } from "./src/server/rateLimit.js";
 import { startCleanupJob } from "./src/server/cleanup.js";
 import { sessionToCsv } from "./src/server/csvExport.js";
@@ -94,6 +95,21 @@ app.get("/api/ai/status", (_req, res) => {
     label: getProviderLabel(),
     configured: getActiveProvider() !== "none",
   });
+});
+
+app.post("/api/suggest-tone", aiLimiter, async (req, res) => {
+  const { topic } = req.body;
+  if (!topic?.trim()) return res.status(400).json({ error: "Topic is required" });
+  if (getActiveProvider() === "none") {
+    return res.status(503).json({ error: "AI not configured" });
+  }
+  try {
+    const tone = await suggestTone(topic.trim());
+    res.json({ tone });
+  } catch (err: any) {
+    logError("suggest-tone", err);
+    res.status(500).json({ error: err.message || "Suggestion failed" });
+  }
 });
 
 app.post("/api/generate-quiz", aiLimiter, async (req, res) => {

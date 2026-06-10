@@ -41,7 +41,8 @@ const DEFAULT_SLIDES: Slide[] = [
 
 export default function PresenterDashboard({ onStartSession }: PresenterDashboardProps) {
   const [topic, setTopic] = useState('');
-  const [slideCount, setSlideCount] = useState(5);
+  const [slideCount, setSlideCount] = useState('5');
+  const [suggestingTone, setSuggestingTone] = useState(false);
   const [audience, setAudience] = useState('Interactive Audience');
   const [tone, setTone] = useState('Witty & Fun');
   const [questionStyle, setQuestionStyle] = useState('mixed');
@@ -71,9 +72,65 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
     "Almost done..."
   ];
 
+  const SLIDE_COUNT_PRESETS = [3, 4, 5, 6, 7, 8, 10, 12, 15, 20];
+  const TONE_OPTIONS = [
+    'Witty & Fun', 'Professional', 'Academic', 'Friendly Casual',
+    'Energetic & Upbeat', 'Serious & Formal', 'Inspirational',
+    'Playful & Lighthearted', 'Conversational', 'Bold & Direct',
+  ];
+  const AUDIENCE_OPTIONS = [
+    'General Audience', 'Interactive Audience', 'High School Students',
+    'University Students', 'Corporate Team', 'Developers / Engineers',
+    'Managers / Executives', 'Workshop Participants', 'Conference Attendees',
+    'Friends & Family', 'Quiz Night Crowd', 'Remote / Hybrid Team',
+    'New Hires / Onboarding', 'Clients / Customers',
+  ];
+  const QUESTION_STYLE_OPTIONS = [
+    { value: 'mixed', label: 'Mixed (recommended)' },
+    { value: 'trivia', label: 'Trivia & facts' },
+    { value: 'opinion', label: 'Opinion polls' },
+    { value: 'educational', label: 'Educational / training' },
+    { value: 'icebreaker', label: 'Icebreaker / fun' },
+    { value: 'professional', label: 'Professional / corporate' },
+    { value: 'debate', label: 'Debate & discussion' },
+    { value: 'scenario', label: 'Scenario-based' },
+    { value: 'reflective', label: 'Reflective' },
+    { value: 'competitive', label: 'Competitive' },
+    { value: 'survey', label: 'Survey-heavy' },
+    { value: 'workshop', label: 'Workshop / hands-on' },
+    { value: 'team-building', label: 'Team-building' },
+    { value: 'technical', label: 'Technical / expert' },
+    { value: 'creative', label: 'Creative & open-ended' },
+    { value: 'quick-check', label: 'Quick pulse checks' },
+  ];
+
+  const handleSuggestTone = async () => {
+    if (!topic.trim()) {
+      setGenerationError('Enter a topic first to suggest a tone');
+      return;
+    }
+    setSuggestingTone(true);
+    setGenerationError('');
+    try {
+      const res = await fetch('/api/suggest-tone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed');
+      setTone(data.tone);
+    } catch (err: any) {
+      setGenerationError(err.message || 'Could not suggest tone');
+    } finally {
+      setSuggestingTone(false);
+    }
+  };
+
   const handleGenerateAI = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic.trim()) return;
+    const count = Math.min(30, Math.max(1, parseInt(slideCount, 10) || 5));
 
     setIsGenerating(true);
     setGenerationError('');
@@ -90,7 +147,7 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic,
-          slideCount,
+          slideCount: count,
           audience,
           tone,
           questionStyle,
@@ -278,29 +335,48 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
                   <label className="text-xs font-semibold text-slate-300">Slide Count</label>
-                  <select
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    list="slide-count-presets"
+                    placeholder="e.g. 5"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-200 rounded-xl text-xs focus:outline-none transition font-medium"
                     value={slideCount}
-                    onChange={(e) => setSlideCount(Number(e.target.value))}
-                  >
-                    {[3, 4, 5, 6, 7, 8].map(n => (
-                      <option key={n} value={n}>{n} Slides</option>
+                    onChange={(e) => setSlideCount(e.target.value)}
+                  />
+                  <datalist id="slide-count-presets">
+                    {SLIDE_COUNT_PRESETS.map((n) => (
+                      <option key={n} value={n} />
                     ))}
-                  </select>
+                  </datalist>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-semibold text-slate-300">Tone</label>
-                  <select
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-slate-300">Tone</label>
+                    <button
+                      type="button"
+                      onClick={handleSuggestTone}
+                      disabled={suggestingTone || !topic.trim()}
+                      className="text-[10px] text-indigo-400 hover:text-indigo-300 font-bold disabled:opacity-40"
+                    >
+                      {suggestingTone ? 'Suggesting...' : 'AI suggest'}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    list="tone-presets"
+                    placeholder="Pick or type a tone"
                     className="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-200 rounded-xl text-xs focus:outline-none transition font-medium"
                     value={tone}
                     onChange={(e) => setTone(e.target.value)}
-                  >
-                    <option value="Witty & Fun">Witty & Fun</option>
-                    <option value="Professional">Professional</option>
-                    <option value="Intellectual">Academic</option>
-                    <option value="Casual Icebreaker">Friendly Casual</option>
-                  </select>
+                  />
+                  <datalist id="tone-presets">
+                    {TONE_OPTIONS.map((t) => (
+                      <option key={t} value={t} />
+                    ))}
+                  </datalist>
                 </div>
               </div>
 
@@ -308,11 +384,17 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
                 <label className="text-xs font-semibold text-slate-300">Target Audience</label>
                 <input
                   type="text"
-                  placeholder="e.g. Developers at Lunch, High Schoolers, Quiz Night"
+                  list="audience-presets"
+                  placeholder="Pick or type your audience"
                   className="w-full px-3 py-2 bg-slate-950 border border-slate-800 focus:border-indigo-500 text-slate-200 rounded-xl text-xs focus:outline-none transition"
                   value={audience}
                   onChange={(e) => setAudience(e.target.value)}
                 />
+                <datalist id="audience-presets">
+                  {AUDIENCE_OPTIONS.map((a) => (
+                    <option key={a} value={a} />
+                  ))}
+                </datalist>
               </div>
 
               <div className="space-y-1.5">
@@ -322,12 +404,9 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
                   value={questionStyle}
                   onChange={(e) => setQuestionStyle(e.target.value)}
                 >
-                  <option value="mixed">Mixed (recommended)</option>
-                  <option value="trivia">Trivia & facts</option>
-                  <option value="opinion">Opinion polls</option>
-                  <option value="educational">Educational / training</option>
-                  <option value="icebreaker">Icebreaker / fun</option>
-                  <option value="professional">Professional / corporate</option>
+                  {QUESTION_STYLE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
                 </select>
               </div>
 

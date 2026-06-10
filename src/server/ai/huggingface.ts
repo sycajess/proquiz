@@ -41,7 +41,10 @@ export async function generateWithHuggingFace(req: DeckRequest): Promise<{ slide
 
   if (!res.ok) {
     const msg = (data as any)?.error?.message || (data as any)?.error || res.statusText;
-    throw new Error(`Hugging Face API error (${res.status}): ${msg}`);
+    const hint = String(msg).includes('not supported')
+      ? ' Enable a provider at huggingface.co/settings/inference-providers or set HUGGINGFACE_MODEL to a supported model.'
+      : '';
+    throw new Error(`Hugging Face API error (${res.status}): ${msg}${hint}`);
   }
 
   const content = data.choices?.[0]?.message?.content;

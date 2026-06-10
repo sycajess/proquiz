@@ -68,7 +68,7 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
   }, []);
 
   const stepCaptions = [
-    "Connecting to Qwen2.5-VL...",
+    "Connecting to Qwen AI...",
     "Analyzing topic and audience context...",
     "Drafting context-aware questions...",
     "Balancing quiz, polls, Q&A and ratings...",

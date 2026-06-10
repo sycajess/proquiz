@@ -13,7 +13,7 @@ export function getActiveProvider(): AIProvider {
 
 export function getProviderLabel(): string {
   const p = getActiveProvider();
-  if (p === 'huggingface') return 'Qwen2.5-VL-7B-Instruct (Hugging Face)';
+  if (p === 'huggingface') return `Qwen (Hugging Face)`;
   if (p === 'gemini') return 'Gemini 3.5 Flash';
   return 'Not configured';
 }

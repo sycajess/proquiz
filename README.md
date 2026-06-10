@@ -1,62 +1,13 @@
 # ProQuiz
 
-Live interactive polling and quiz app — like Mentimeter. No login required.
+A live polling and quiz app for presentations, meetings, and classrooms — like Mentimeter.
 
-## What it does
+**How it works:**
+- A presenter builds a slide deck (manually, from templates, or with AI)
+- They start a session and share a 6-digit code
+- The audience joins on their phones and answers in real time
+- Everyone sees live results on the screen
 
-- Build presentation decks manually, from templates, or with AI
-- Run live sessions with a 6-digit room code
-- Audience joins on phone and answers in real time
-- Slide types: polls, quizzes, word clouds, ratings, Q&A, content slides
+**Slide types:** polls, quizzes, word clouds, ratings, Q&A, and content slides.
 
-## Quick start
-
-```bash
-npm install
-```
-
-Copy `.env.example` to `.env.local` and add your Hugging Face token:
-
-```
-HUGGINGFACE_API_TOKEN=your_token_here
-APP_URL=http://localhost:3000
-```
-
-```bash
-npm run dev
-```
-
-Open http://localhost:3000
-
-## AI generation
-
-Uses **Qwen2.5-VL-7B-Instruct** via Hugging Face. Get a token at https://huggingface.co/settings/tokens
-
-## Routes
-
-| URL | Purpose |
-|-----|---------|
-| `/` | Landing |
-| `/join/:code` | Audience join |
-| `/present/:code` | Projector view |
-| `/control/:code` | Presenter remote |
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm start` | Run production server |
-| `npm test` | Run tests |
-| `npm run backup` | Backup session data |
-
-## Deploy
-
-Do **not** use Vercel — this app needs WebSockets and persistent storage.
-
-Use Railway, Render, or Fly.io. See [DEPLOY.md](DEPLOY.md).
-
-## Stack
-
-React, Vite, Tailwind, Express, WebSocket, Hugging Face AI
+No login needed. Just create, share the code, and go.

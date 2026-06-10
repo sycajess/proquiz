@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   CheckCircle, Send, Gamepad2, Clock, X, ArrowLeft, ChevronRight, Info, MessageSquare, ThumbsUp, FileText
 } from 'lucide-react';
-import { Slide, Participant, LiveResponse } from '../types';
+import { Slide, Participant, LiveResponse, ContentSlide } from '../types';
+import { effectiveSlideType } from '../utils/effectiveSlideType';
 
 interface ParticipantScreenProps {
   initialRoomCode?: string;
@@ -131,7 +132,7 @@ export default function ParticipantScreen({
               // Reset rating defaults to standard midpoint 5
               const initialRatings: { [i: number]: number } = {};
               const activeSlide = session.slides[session.currentSlideIndex];
-              if (activeSlide && activeSlide.type === 'rating_scale') {
+              if (activeSlide && effectiveSlideType(activeSlide) === 'rating_scale' && 'scaleStatements' in activeSlide) {
                 activeSlide.scaleStatements.forEach((_: any, idx: number) => {
                   initialRatings[idx] = 5;
                 });
@@ -514,12 +515,14 @@ export default function ParticipantScreen({
     );
   }
 
-  const isMultipleChoice = currentSlide.type === 'multiple_choice';
-  const isQuiz = currentSlide.type === 'quiz';
-  const isWordCloud = currentSlide.type === 'word_cloud';
-  const isScale = currentSlide.type === 'rating_scale';
-  const isQA = currentSlide.type === 'qa';
-  const isContent = currentSlide.type === 'content';
+  const slideType = effectiveSlideType(currentSlide);
+  const isMultipleChoice = slideType === 'multiple_choice';
+  const isQuiz = slideType === 'quiz';
+  const isWordCloud = slideType === 'word_cloud';
+  const isScale = slideType === 'rating_scale';
+  const isQA = slideType === 'qa';
+  const isContent = slideType === 'content';
+  const contentSlide = currentSlide as ContentSlide;
 
   return (
     <div className={participantShell(embedded, `${embedded ? 'p-3 gap-3' : 'justify-between p-6'}`)}>
@@ -549,10 +552,27 @@ export default function ParticipantScreen({
       <div className={`${embedded ? '' : 'grow'} flex flex-col ${embedded ? 'justify-start' : 'justify-center'} py-3`}>
         
         {isContent ? (
-          <div className="text-center space-y-4 max-w-sm mx-auto">
-            <FileText className="h-10 w-10 text-indigo-500 mx-auto" />
-            <p className="text-sm text-slate-600 font-medium">Watch the presenter screen</p>
-            <span className="text-[10px] text-slate-400 border border-slate-200 px-3 py-1.5 rounded-xl">Content slide — no action needed</span>
+          <div className="text-center space-y-4 max-w-sm mx-auto w-full">
+            <FileText className="h-8 w-8 text-indigo-500 mx-auto" />
+            <h3 className="font-black text-base text-slate-800 leading-snug">
+              {contentSlide.title || currentSlide.question}
+            </h3>
+            {contentSlide.subtitle && (
+              <p className="text-xs text-slate-500 font-medium">{contentSlide.subtitle}</p>
+            )}
+            {contentSlide.bullets && contentSlide.bullets.length > 0 && (
+              <ul className="text-left space-y-2 bg-white border border-slate-200 rounded-xl p-4 text-xs text-slate-700">
+                {contentSlide.bullets.map((b, i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <span className="text-indigo-600 font-bold shrink-0">•</span>
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <p className="text-[11px] text-slate-500 leading-relaxed">
+              This is an intro slide — no answer needed. The host will move to questions shortly.
+            </p>
           </div>
         ) : responseSubmitted && !isQA ? (
           

@@ -97,7 +97,32 @@ export function normalizeSlides(raw: unknown[]): Slide[] {
           scaleStatements: item.scaleStatements || item.statements || item.scale_statements || ['Quality', 'Engagement'],
         });
         break;
-      case 'content':
+      case 'content': {
+        const hasOptions = Array.isArray(item.options) && item.options.length >= 2;
+        if (hasOptions) {
+          const hasCorrect =
+            item.correctOptionIndex !== undefined ||
+            item.correct_index !== undefined ||
+            item.timeLimit !== undefined ||
+            item.time_limit !== undefined;
+          if (hasCorrect) {
+            slides.push({
+              ...base,
+              type: 'quiz',
+              options: item.options.slice(0, 4),
+              correctOptionIndex: Math.min(3, Math.max(0, item.correctOptionIndex ?? item.correct_index ?? 0)),
+              timeLimit: item.timeLimit || item.time_limit || 20,
+              explanation: item.explanation || '',
+            });
+          } else {
+            slides.push({
+              ...base,
+              type: 'multiple_choice',
+              options: item.options.slice(0, 6),
+            });
+          }
+          break;
+        }
         slides.push({
           ...base,
           type: 'content',
@@ -107,6 +132,7 @@ export function normalizeSlides(raw: unknown[]): Slide[] {
           imageUrl: item.imageUrl || item.image_url,
         });
         break;
+      }
     }
   });
 

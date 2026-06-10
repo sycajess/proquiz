@@ -23,6 +23,7 @@ import { suggestShareMessage } from "./src/server/ai/suggestShare.js";
 import { apiLimiter, aiLimiter } from "./src/server/rateLimit.js";
 import { startCleanupJob } from "./src/server/cleanup.js";
 import { sessionToCsv } from "./src/server/csvExport.js";
+import { effectiveSlideType, repairSlides } from "./src/utils/effectiveSlideType.js";
 import { logError } from "./src/server/monitoring.js";
 
 dotenv.config();
@@ -175,7 +176,7 @@ app.post("/api/rooms", (req, res) => {
   const roomCode = generateRoomCode();
   const session: PresentationSession = {
     roomCode,
-    slides,
+    slides: repairSlides(slides),
     currentSlideIndex: 0,
     status: "lobby",
     showQuizCorrectAnswer: false,
@@ -277,7 +278,7 @@ function initTimerForSlide(roomCode: string) {
   if (!room) return;
   const slide = room.session.slides[room.session.currentSlideIndex];
 
-  if (slide?.type === "quiz") {
+  if (slide && effectiveSlideType(slide) === "quiz") {
     const limit = slide.timeLimit || 20;
     room.session.slideTimer = limit;
     room.session.timerActive = true;
@@ -516,9 +517,10 @@ wss.on("connection", (ws: WebSocket) => {
 
           const activeIdx = room.session.currentSlideIndex;
           const activeSlide = room.session.slides[activeIdx];
+          const slideType = effectiveSlideType(activeSlide);
           const participantId = userSession.participantId;
           const participantObj = room.participants.get(participantId);
-          if (!participantObj || activeSlide.type === "content") return;
+          if (!participantObj || slideType === "content") return;
 
           if (!room.responses[activeIdx]) room.responses[activeIdx] = [];
 
@@ -526,12 +528,12 @@ wss.on("connection", (ws: WebSocket) => {
             if (r.type === "qa") return r.payload.participantId === participantId;
             return r.payload?.participantId === participantId;
           });
-          if (already && activeSlide.type !== "qa") return;
+          if (already && slideType !== "qa") return;
 
           const submission = payload;
           let answerFeedback: any = null;
 
-          if (activeSlide.type === "quiz") {
+          if (slideType === "quiz") {
             const maxSeconds = activeSlide.timeLimit || 20;
             const elapsedMs = submission.timeTaken || 0;
             const chosenIdx = submission.optionIndex;
@@ -543,19 +545,19 @@ wss.on("connection", (ws: WebSocket) => {
             const quizPayload = { participantId, optionIndex: chosenIdx, timeTaken: elapsedMs, correct: isCorrect, pointsEarned: points };
             room.responses[activeIdx].push({ type: "quiz", payload: quizPayload });
             answerFeedback = quizPayload;
-          } else if (activeSlide.type === "multiple_choice") {
+          } else if (slideType === "multiple_choice") {
             const mcPayload = { participantId, optionIndex: submission.optionIndex };
             room.responses[activeIdx].push({ type: "multiple_choice", payload: mcPayload });
             answerFeedback = mcPayload;
-          } else if (activeSlide.type === "word_cloud") {
+          } else if (slideType === "word_cloud") {
             const wcPayload = { participantId, words: filterWords(submission.words || []) };
             room.responses[activeIdx].push({ type: "word_cloud", payload: wcPayload });
             answerFeedback = wcPayload;
-          } else if (activeSlide.type === "rating_scale") {
+          } else if (slideType === "rating_scale") {
             const ratingPayload = { participantId, ratings: submission.ratings || [] };
             room.responses[activeIdx].push({ type: "rating_scale", payload: ratingPayload });
             answerFeedback = ratingPayload;
-          } else if (activeSlide.type === "qa") {
+          } else if (slideType === "qa") {
             const qaPayload = {
               id: `qa_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
               participantId,

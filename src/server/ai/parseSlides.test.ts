@@ -24,4 +24,15 @@ describe('parseSlides', () => {
     const slides = normalizeSlides([{ type: 'content', title: 'Welcome!' }]);
     assert.equal(slides[0].question, 'Welcome!');
   });
+
+  it('reclassifies content slides that include poll options', () => {
+    const slides = normalizeSlides([{
+      type: 'content',
+      question: 'What year did Ghana gain independence?',
+      options: ['1957', '1960', '1945', '1970'],
+      correctOptionIndex: 0,
+      timeLimit: 20,
+    }]);
+    assert.equal(slides[0].type, 'quiz');
+  });
 });

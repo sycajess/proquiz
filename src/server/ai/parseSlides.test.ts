@@ -19,4 +19,9 @@ describe('parseSlides', () => {
     assert.equal(slides[0].type, 'quiz');
     assert.equal((slides[0] as any).correctOptionIndex, 1);
   });
+
+  it('uses title when question missing', () => {
+    const slides = normalizeSlides([{ type: 'content', title: 'Welcome!' }]);
+    assert.equal(slides[0].question, 'Welcome!');
+  });
 });

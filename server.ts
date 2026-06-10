@@ -119,9 +119,24 @@ app.post("/api/generate-quiz", aiLimiter, async (req, res) => {
   }
 });
 
+function loadTemplates() {
+  const candidates = [
+    path.join(process.cwd(), "dist", "data", "templates.json"),
+    path.join(process.cwd(), "src", "data", "templates.json"),
+  ];
+  for (const file of candidates) {
+    if (fs.existsSync(file)) return JSON.parse(fs.readFileSync(file, "utf-8"));
+  }
+  throw new Error("templates.json not found");
+}
+
 app.get("/api/templates", (_req, res) => {
-  const file = path.join(process.cwd(), "src", "data", "templates.json");
-  res.json(JSON.parse(fs.readFileSync(file, "utf-8")));
+  try {
+    res.json(loadTemplates());
+  } catch (err: any) {
+    logError("templates", err);
+    res.status(500).json({ error: "Templates unavailable" });
+  }
 });
 
 app.post("/api/rooms", (req, res) => {

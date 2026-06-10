@@ -46,7 +46,6 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
   const [tone, setTone] = useState('Witty & Fun');
   const [questionStyle, setQuestionStyle] = useState('mixed');
   const [extraContext, setExtraContext] = useState('');
-  const [aiProviderLabel, setAiProviderLabel] = useState('Loading...');
   const [isGenerating, setIsGenerating] = useState(false);
   const [genStep, setGenStep] = useState(0);
   const [generationError, setGenerationError] = useState('');
@@ -62,17 +61,14 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
 
   useEffect(() => {
     fetch('/api/templates').then(r => r.json()).then(setTemplates).catch(() => {});
-    fetch('/api/ai/status').then(r => r.json()).then(d => {
-      setAiProviderLabel(d.configured ? d.label : 'Not configured — add HF token');
-    }).catch(() => setAiProviderLabel('AI unavailable'));
   }, []);
 
   const stepCaptions = [
-    "Connecting to Qwen AI...",
-    "Analyzing topic and audience context...",
-    "Drafting context-aware questions...",
-    "Balancing quiz, polls, Q&A and ratings...",
-    "Finalizing your interactive deck..."
+    "Getting things ready...",
+    "Understanding your topic...",
+    "Creating your questions...",
+    "Building your slides...",
+    "Almost done..."
   ];
 
   const handleGenerateAI = async (e: React.FormEvent) => {
@@ -249,7 +245,7 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
             </div>
             <div>
               <h2 className="font-semibold text-slate-100 tracking-tight font-heading">AI Slides Generator</h2>
-              <p className="text-xs text-slate-400">{aiProviderLabel}</p>
+              <p className="text-xs text-slate-400">Build your deck in seconds</p>
             </div>
           </div>
 

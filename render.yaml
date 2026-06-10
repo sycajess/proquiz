@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: proquiz
+    runtime: node
+    plan: free
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HUGGINGFACE_API_TOKEN
+        sync: false
+      - key: APP_URL
+        sync: false
+      - key: ROOM_TTL_HOURS
+        value: "24"
+      - key: ARCHIVE_TTL_DAYS
+        value: "30"
+    disk:
+      name: proquiz-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1

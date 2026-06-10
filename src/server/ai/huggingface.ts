@@ -1,4 +1,4 @@
-import { HF_CHAT_URL, HF_MODEL, getHfToken } from './constants.js';
+import { HF_CHAT_URL, getHfModelId, getHfToken } from './constants.js';
 import { buildSystemPrompt, buildUserPrompt, DeckRequest } from './prompts.js';
 import { extractJsonArray, normalizeSlides } from './parseSlides.js';
 import { Slide } from '../../types.js';
@@ -18,7 +18,7 @@ export async function generateWithHuggingFace(req: DeckRequest): Promise<{ slide
     throw new Error('HUGGINGFACE_API_TOKEN not set. Add your token to .env.local');
   }
 
-  const modelId = HF_MODEL;
+  const modelId = getHfModelId();
 
   const res = await fetch(HF_CHAT_URL, {
     method: 'POST',

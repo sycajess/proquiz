@@ -245,7 +245,6 @@ export default function PresenterDashboard({ onStartSession }: PresenterDashboar
             </div>
             <div>
               <h2 className="font-semibold text-slate-100 tracking-tight font-heading">AI Slides Generator</h2>
-              <p className="text-xs text-slate-400">Build your deck in seconds</p>
             </div>
           </div>
 

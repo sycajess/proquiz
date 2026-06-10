@@ -12,10 +12,7 @@ export function getActiveProvider(): AIProvider {
 }
 
 export function getProviderLabel(): string {
-  const p = getActiveProvider();
-  if (p === 'huggingface') return `Qwen (Hugging Face)`;
-  if (p === 'gemini') return 'Gemini 3.5 Flash';
-  return 'Not configured';
+  return getActiveProvider() === 'none' ? 'Not configured' : 'AI';
 }
 
 export async function generateDeck(req: DeckRequest): Promise<{ slides: Slide[]; provider: string }> {

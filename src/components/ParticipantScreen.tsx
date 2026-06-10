@@ -7,13 +7,22 @@ import { Slide, Participant, LiveResponse } from '../types';
 interface ParticipantScreenProps {
   initialRoomCode?: string;
   onExit: () => void;
+  /** When rendered inside the sandbox phone frame */
+  embedded?: boolean;
+}
+
+function participantShell(embedded: boolean, extra = '') {
+  return embedded
+    ? `bg-slate-50 h-full min-h-0 overflow-y-auto overscroll-y-contain text-slate-900 flex flex-col font-sans ${extra}`
+    : `bg-slate-50 min-h-screen text-slate-900 flex flex-col font-sans ${extra}`;
 }
 
 const AVATAR_EMOJIS = ['🦕', '🚀', '🦊', '🦉', '🍕', '🐱', '🥑', '👾', '🦄', '🦁', '🐨', '🎯', '🔥', '🎨'];
 
 export default function ParticipantScreen({ 
   initialRoomCode = '', 
-  onExit 
+  onExit,
+  embedded = false,
 }: ParticipantScreenProps) {
   
   // Connection states
@@ -295,24 +304,28 @@ export default function ParticipantScreen({
   // RENDER lobby onboarding profile customizer
   if (!joinedRoom || !roomState) {
     return (
-      <div className="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-center items-center p-6 relative font-sans">
+      <div className={participantShell(embedded, embedded ? 'items-center p-3 pb-6' : 'justify-center items-center p-6 relative')}>
         
-        <div className="w-full max-w-sm space-y-6 z-10 animate-fade-in">
+        <div className={`w-full ${embedded ? 'space-y-3' : 'max-w-sm space-y-6'} z-10 animate-fade-in`}>
           
-          <div className="text-center space-y-2">
-            <button 
-              onClick={onExit}
-              className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 mx-auto font-bold cursor-pointer transition"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to Choice
-            </button>
-            <h2 className="text-2xl font-black font-heading text-slate-900 tracking-tight">
-              Explorer Join Panel
+          <div className="text-center space-y-1">
+            {!embedded && (
+              <button 
+                onClick={onExit}
+                className="text-xs text-slate-500 hover:text-slate-800 flex items-center gap-1 mx-auto font-bold cursor-pointer transition mb-2"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" /> Back to Choice
+              </button>
+            )}
+            <h2 className={`${embedded ? 'text-lg' : 'text-2xl'} font-black font-heading text-slate-900 tracking-tight`}>
+              {embedded ? 'Join Session' : 'Explorer Join Panel'}
             </h2>
-            <p className="text-xs text-slate-550 font-medium">Join the active presentation session in real-time</p>
+            {!embedded && (
+              <p className="text-xs text-slate-550 font-medium">Join the active presentation session in real-time</p>
+            )}
           </div>
 
-          <form onSubmit={handleJoinSubmit} className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-4">
+          <form onSubmit={handleJoinSubmit} className={`bg-white border border-slate-200 rounded-2xl shadow-sm ${embedded ? 'p-4 space-y-3' : 'p-6 space-y-4'}`}>
             
             {/* PIN Code */}
             <div className="space-y-1.5">
@@ -347,7 +360,7 @@ export default function ParticipantScreen({
             {/* Emoji Avatar Pickers */}
             <div className="space-y-1.5">
               <label className="text-xs font-bold text-slate-400 block uppercase">Select Avatar Emoji</label>
-              <div className="grid grid-cols-7 gap-2 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl max-h-[100px] overflow-y-auto">
+              <div className={`grid ${embedded ? 'grid-cols-6' : 'grid-cols-7'} gap-1.5 p-1.5 bg-slate-50 border border-slate-200 rounded-2xl max-h-[88px] overflow-y-auto`}>
                 {AVATAR_EMOJIS.map((emoji) => (
                   <button
                     key={emoji}
@@ -413,9 +426,9 @@ export default function ParticipantScreen({
     const myRankIdx = leaderSorted.findIndex(p => p.id === participantId);
 
     return (
-      <div className="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between p-6 font-sans animate-fade-in">
-        <div className="text-center pt-8 space-y-2">
-          <p className="text-5xl animate-bounce">🏆</p>
+      <div className={participantShell(embedded, `${embedded ? 'p-3 gap-4' : 'justify-between p-6'} animate-fade-in`)}>
+        <div className={`text-center ${embedded ? 'pt-4' : 'pt-8'} space-y-2`}>
+          <p className={`${embedded ? 'text-3xl' : 'text-5xl'} animate-bounce`}>🏆</p>
           <h2 className="text-xl font-black text-slate-800 tracking-tight font-heading">Presentation Exit Panel</h2>
           <p className="text-xs text-slate-550 font-medium">The presenter has finished the session</p>
         </div>
@@ -456,8 +469,8 @@ export default function ParticipantScreen({
   // Lobby wait screen details
   if (roomState.status === 'lobby') {
     return (
-      <div className="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between p-6 font-sans">
-        <div className="flex justify-between items-center bg-white px-4 py-2 border border-slate-200 rounded-2xl shadow-xs text-slate-800">
+      <div className={participantShell(embedded, `${embedded ? 'p-3 gap-4' : 'justify-between p-6'}`)}>
+        <div className="flex justify-between items-center bg-white px-4 py-2 border border-slate-200 rounded-2xl shadow-xs text-slate-800 shrink-0">
           <div className="flex items-center gap-2">
             <span>{selectedAvatar}</span>
             <span className="font-bold text-xs">{nickname}</span>
@@ -467,7 +480,7 @@ export default function ParticipantScreen({
           </span>
         </div>
 
-        <div className="max-w-md mx-auto w-full text-center py-16 space-y-6">
+        <div className={`max-w-md mx-auto w-full text-center ${embedded ? 'py-4' : 'py-16'} space-y-4`}>
           <div className="relative">
             <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center border border-indigo-100 mx-auto animate-pulse">
               <Clock className="h-8 w-8 text-indigo-600 animate-spin" style={{ animationDuration: '8s' }} />
@@ -509,7 +522,7 @@ export default function ParticipantScreen({
   const isContent = currentSlide.type === 'content';
 
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-900 flex flex-col justify-between p-6 font-sans">
+    <div className={participantShell(embedded, `${embedded ? 'p-3 gap-3' : 'justify-between p-6'}`)}>
       
       {presenterOffline && (
         <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs font-bold px-4 py-2 rounded-xl text-center">
@@ -533,7 +546,7 @@ export default function ParticipantScreen({
       </div>
 
       {/* Main Response Pad */}
-      <div className="grow flex flex-col justify-center py-5">
+      <div className={`${embedded ? '' : 'grow'} flex flex-col ${embedded ? 'justify-start' : 'justify-center'} py-3`}>
         
         {isContent ? (
           <div className="text-center space-y-4 max-w-sm mx-auto">

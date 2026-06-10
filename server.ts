@@ -19,6 +19,7 @@ import { calculateQuizPoints } from "./src/server/scoring.js";
 import { uniqueNickname } from "./src/server/nicknames.js";
 import { generateDeck, getActiveProvider, getProviderLabel } from "./src/server/ai/generateDeck.js";
 import { suggestTone } from "./src/server/ai/suggestTone.js";
+import { suggestShareMessage } from "./src/server/ai/suggestShare.js";
 import { apiLimiter, aiLimiter } from "./src/server/rateLimit.js";
 import { startCleanupJob } from "./src/server/cleanup.js";
 import { sessionToCsv } from "./src/server/csvExport.js";
@@ -95,6 +96,18 @@ app.get("/api/ai/status", (_req, res) => {
     label: getProviderLabel(),
     configured: getActiveProvider() !== "none",
   });
+});
+
+app.post("/api/suggest-share", aiLimiter, async (req, res) => {
+  const { topic, joinUrl, roomCode } = req.body;
+  if (!joinUrl || !roomCode) return res.status(400).json({ error: "joinUrl and roomCode required" });
+  try {
+    const message = await suggestShareMessage(topic || "live quiz", joinUrl, roomCode);
+    res.json({ message });
+  } catch (err: any) {
+    logError("suggest-share", err);
+    res.status(500).json({ error: err.message || "Share message failed" });
+  }
 });
 
 app.post("/api/suggest-tone", aiLimiter, async (req, res) => {

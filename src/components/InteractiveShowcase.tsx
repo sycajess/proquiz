@@ -85,7 +85,7 @@ export default function InteractiveShowcase({
       <div className="bg-slate-950 min-h-screen text-slate-100 flex flex-col justify-center items-center py-20">
         <div className="space-y-4 text-center">
           <div className="w-12 h-12 border-4 border-slate-700/60 border-t-violet-400 rounded-full animate-spin mx-auto"></div>
-          <p className="text-sm text-slate-400 font-medium">Bootstrapping WebSocket Room {initialRoomCode}...</p>
+          <p className="text-sm text-slate-400 font-medium">Setting up your session...</p>
         </div>
       </div>
     );
@@ -173,7 +173,7 @@ export default function InteractiveShowcase({
             </div>
 
             {/* Right Frame: Phone Simulator (occupies 4 columns) */}
-            <div className="lg:col-span-4 bg-slate-900 flex flex-col justify-center items-center py-8 px-4 overflow-y-auto relative">
+            <div className="lg:col-span-4 bg-slate-900 flex flex-col items-center pt-10 pb-8 px-4 overflow-y-auto relative min-h-[320px]">
               
               {/* Simulator info panel */}
               <div className="absolute top-2 left-4 right-4 flex justify-between items-center text-[10px] text-slate-500 font-mono">
@@ -185,16 +185,17 @@ export default function InteractiveShowcase({
               </div>
 
               {/* iPhone / Smartphone Mockup framing */}
-              <div className="relative w-full max-w-[290px] aspect-[9/18.5] bg-slate-950 border-[6px] border-slate-800 rounded-[36px] shadow-2xl overflow-hidden flex flex-col justify-between ring-1 ring-slate-800/25">
+              <div className="relative w-full max-w-[290px] h-[min(72vh,580px)] min-h-[420px] bg-slate-950 border-[6px] border-slate-800 rounded-[36px] shadow-2xl overflow-hidden flex flex-col ring-1 ring-slate-800/25 shrink-0">
                 
                 {/* Dynamic Camera Notch (iPhone style) */}
-                <span className="absolute top-1 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-slate-800 rounded-full z-30"></span>
+                <span className="absolute top-1 left-1/2 -translate-x-1/2 w-16 h-3.5 bg-slate-800 rounded-full z-30 pointer-events-none"></span>
 
-                {/* Inner simulated player */}
-                <div className="grow overflow-hidden relative">
+                {/* Inner simulated player — scrollable */}
+                <div className="flex-1 min-h-0 pt-5 relative">
                   <ParticipantScreen
                     initialRoomCode={initialRoomCode}
                     onExit={() => setViewMode('projector')}
+                    embedded
                   />
                 </div>
               </div>

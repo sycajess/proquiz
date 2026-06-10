@@ -202,7 +202,10 @@ export default function App() {
         {role === 'presenting' && (
           <div className="w-full h-full min-h-[80vh] flex flex-col justify-center animate-fade-in">
             {loadingCode ? (
-              <div className="text-center"><div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div></div>
+              <div className="text-center space-y-3">
+                <div className="w-12 h-12 border-4 border-slate-200 border-t-indigo-600 rounded-full animate-spin mx-auto"></div>
+                <p className="text-sm text-slate-500">Starting your session...</p>
+              </div>
             ) : (
               <InteractiveShowcase initialRoomCode={activeRoomCode} onExit={handleExitToLanding} />
             )}

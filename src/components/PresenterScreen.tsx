@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Users, ChevronRight, ChevronLeft, Trophy, Timer, HelpCircle, BarChart2, Cloud, Sliders,
   Check, Lightbulb, CornerDownRight, RefreshCw, XSquare, Award, LogOut, MessageSquare,
-  FileText, ThumbsUp, EyeOff, Download, Smartphone
+  FileText, ThumbsUp, EyeOff, Download, Smartphone, Copy, Share2, CheckCheck
 } from 'lucide-react';
 import { Slide, Participant, LiveResponse } from '../types';
 import { getJoinUrl, getControlUrl, getPresentUrl } from '../utils/joinUrl';
@@ -32,10 +32,38 @@ const COLOR_PALETTES = [
 export default function PresenterScreen({ 
   session, participants, responses, onSendMessage, onExit, displayOnly = false
 }: PresenterScreenProps) {
-  
+  const [copied, setCopied] = useState<'url' | 'code' | 'share' | null>(null);
+  const [sharing, setSharing] = useState(false);
+
   const currentIdx = session.currentSlideIndex;
   const currentSlide: Slide | undefined = session.slides[currentIdx];
   const joinUrl = getJoinUrl(session.roomCode);
+
+  const sessionTopic = session.slides?.[0]?.title || session.slides?.[0]?.question || 'live quiz';
+
+  const copyText = async (text: string, type: 'url' | 'code' | 'share') => {
+    await navigator.clipboard.writeText(text);
+    setCopied(type);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleShare = async () => {
+    setSharing(true);
+    try {
+      const res = await fetch('/api/suggest-share', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: sessionTopic, joinUrl, roomCode: session.roomCode }),
+      });
+      const data = await res.json();
+      const message = data.message || `Join my live session!\n\n${joinUrl}\nCode: ${session.roomCode}`;
+      await copyText(message, 'share');
+    } catch {
+      await copyText(`Join my live session!\n\n${joinUrl}\nCode: ${session.roomCode}`, 'share');
+    } finally {
+      setSharing(false);
+    }
+  };
 
   // Compute stats based on responses
   const getMultipleChoiceCounts = () => {
@@ -127,19 +155,32 @@ export default function PresenterScreen({
             <h2 className="text-slate-400 text-xs uppercase font-extrabold font-heading tracking-widest">
               Join the Active Screen
             </h2>
-            <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-xl mx-auto shadow-sm relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-indigo-600 rounded-full text-[10px] font-bold font-mono text-white">
-                URL CONNECTION
-              </div>
-              
+            <div className="bg-white border border-slate-200 rounded-2xl p-8 max-w-xl mx-auto shadow-sm">
               <div className="space-y-6">
                 <div className="flex flex-col md:flex-row items-center gap-6">
                   <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(joinUrl)}`} alt="Join QR" className="rounded-lg w-[120px] h-[120px]" />
-                  <div className="text-left space-y-3">
-                    <p className="text-xs font-semibold text-slate-500">Scan or open:</p>
-                    <p className="text-indigo-600 font-mono text-sm font-bold select-all break-all">{joinUrl}</p>
-                    <p className="text-xs text-slate-500">Room code:</p>
-                    <div className="text-4xl font-black tracking-widest text-indigo-900 font-mono select-all">{session.roomCode}</div>
+                  <div className="text-left space-y-3 flex-1">
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Join link</p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-indigo-600 font-mono text-sm font-bold break-all flex-1">{joinUrl}</p>
+                        <button type="button" onClick={() => copyText(joinUrl, 'url')} className="p-1.5 text-slate-400 hover:text-indigo-600 shrink-0" title="Copy link">
+                          {copied === 'url' ? <CheckCheck className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500 mb-1">Room code</p>
+                      <div className="flex items-center gap-2">
+                        <div className="text-4xl font-black tracking-widest text-indigo-900 font-mono">{session.roomCode}</div>
+                        <button type="button" onClick={() => copyText(session.roomCode, 'code')} className="p-1.5 text-slate-400 hover:text-indigo-600" title="Copy code">
+                          {copied === 'code' ? <CheckCheck className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                        </button>
+                        <button type="button" onClick={handleShare} disabled={sharing} className="p-1.5 text-slate-400 hover:text-indigo-600" title="Copy invite message">
+                          {copied === 'share' ? <CheckCheck className="h-4 w-4 text-emerald-500" /> : <Share2 className="h-4 w-4" />}
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 {!displayOnly && (
@@ -183,10 +224,9 @@ export default function PresenterScreen({
         <div className="flex justify-center pt-8 z-10 border-t border-slate-200">
           <button
             onClick={() => onSendMessage('start_presentation')}
-            disabled={participants.length === 0}
-            className="py-3.5 px-8 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold tracking-wide rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
+            className="py-3.5 px-8 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold tracking-wide rounded-xl shadow-md flex items-center gap-2 cursor-pointer transition-all duration-200 transform hover:-translate-y-0.5 active:translate-y-0"
           >
-            Start Interactive Presentation
+            Start Presentation
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

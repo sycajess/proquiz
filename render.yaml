@@ -17,7 +17,3 @@ services:
         value: "24"
       - key: ARCHIVE_TTL_DAYS
         value: "30"
-    disk:
-      name: proquiz-data
-      mountPath: /opt/render/project/src/data
-      sizeGB: 1

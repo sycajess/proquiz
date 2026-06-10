@@ -1,0 +1,8 @@
+{
+  "name": "ProQuiz AI",
+  "description": "A real-time interactive quiz and polling platform (like Mentimeter) with automated AI quiz generation, live audience polling, word clouds, scale ratings, and quiz competitions with live scoring.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

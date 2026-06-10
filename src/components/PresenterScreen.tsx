@@ -535,9 +535,10 @@ export default function PresenterScreen({
                   {responses.filter(r => r.type === 'qa' && !r.payload.hidden).length === 0 ? (
                     <div className="text-center py-10 text-slate-400"><MessageSquare className="h-8 w-8 mx-auto opacity-30 mb-2" /><p className="text-xs">No questions yet</p></div>
                   ) : (
-                    responses.filter(r => r.type === 'qa' && !r.payload.hidden)
-                      .sort((a, b) => (b.payload.upvotes?.length || 0) - (a.payload.upvotes?.length || 0))
-                      .map((r) => r.type === 'qa' && (
+                    responses
+                      .filter((r): r is Extract<typeof r, { type: 'qa' }> => r.type === 'qa' && !r.payload.hidden)
+                      .sort((a, b) => b.payload.upvotes.length - a.payload.upvotes.length)
+                      .map((r) => (
                         <div key={r.payload.id} className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-start gap-3">
                           <div>
                             <p className="text-sm font-medium text-slate-800">{r.payload.text}</p>
